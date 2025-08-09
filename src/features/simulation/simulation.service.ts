@@ -3,41 +3,49 @@ import { getAdvertiser } from '@app/features/budgets/budgets.repository';
 import { getLatestBudget, createBudgetForDay } from '@app/features/budgets/budgets.repository';
 
 export async function simulateDay() {
-  // 1. Get all advertisers
+  console.log('Starting day simulation...');
   const advertisers = await db('advertisers').select('id', 'balance');
+  console.log(`Found ${advertisers.length} advertisers.`);
 
   for (const advertiser of advertisers) {
-    // 2. Get the latest budget for the advertiser
+    console.log(`Processing advertiser: ${advertiser.id}, current balance: ${advertiser.balance}`);
     const latestBudget = await getLatestBudget(advertiser.id);
+    console.log(`Latest budget for ${advertiser.id}:`, latestBudget);
 
     if (latestBudget) {
-      // 3. Calculate unused budget and add to rollover
       const dailyBudgetNum = Number(latestBudget.daily_budget);
       const usedTodayNum = Number(latestBudget.used_today);
       const unusedBudget = dailyBudgetNum - usedTodayNum;
+      console.log(`Unused budget for ${advertiser.id}: ${unusedBudget}`);
 
       if (unusedBudget > 0) {
         await db('advertisers')
           .where({ id: advertiser.id })
           .increment('balance', unusedBudget);
+        const updatedAdvertiser = await getAdvertiser(advertiser.id);
+        console.log(`Updated balance for ${advertiser.id}: ${updatedAdvertiser.balance}`);
       }
 
-      // 4. Create a new budget for the next day
       const lastBudgetDate = new Date(latestBudget.current_day);
       lastBudgetDate.setDate(lastBudgetDate.getDate() + 1);
       const newDayString = lastBudgetDate.toISOString().slice(0, 10);
+      console.log(`New day string for ${advertiser.id}: ${newDayString}`);
 
-      await createBudgetForDay(advertiser.id, newDayString);
+      const existingBudget = await db('budgets').where({ advertiser_id: advertiser.id, current_day: newDayString }).first();
 
-      // 5. Attempt to reschedule previously deferred campaigns for the new day
+      if (!existingBudget) {
+        await createBudgetForDay(advertiser.id, newDayString);
+      }
+
       await rescheduleDeferredCampaigns(advertiser.id, newDayString);
     } else {
-      // No previous budget, create one for today
       const today = new Date().toISOString().slice(0, 10);
+      console.log(`No previous budget for ${advertiser.id}, creating one for today: ${today}`);
       await createBudgetForDay(advertiser.id, today);
     }
   }
 
+  console.log('Day simulation complete.');
   return { message: 'Day simulation complete' };
 }
 
