@@ -19,9 +19,9 @@ The implementation follows modern backend development best practices to showcase
 1.  [x] Docker Environment (`Dockerfile`, `docker-compose.yml`)
 2.  [x] TypeScript Project (`npm init`, initial dependencies)
 3.  [x] Dependency Swap (Express -> Fastify)
-4.  [ ] TypeScript Config (`tsconfig.json`)
-5.  [ ] Project Structure (`src` folder, feature modules)
-6.  [ ] Knex Setup (`knexfile.ts`, initial migration)
+4.  [x] TypeScript Config (`tsconfig.json`)
+5.  [x] Project Structure (`src` folder, feature modules)
+6.  [x] Knex Setup (`knexfile.ts`, initial migration)
 7.  [ ] Core Server (`src/app.ts` with Fastify plugins)
 
 **Phase 2: Feature & API Endpoint Implementation**
@@ -61,3 +61,27 @@ This section documents the commands used to set up the initial project structure
     npm install --save-dev typescript @types/node ts-node
     ```
     *Reason: Installs the final production and development dependencies.*
+
+5.  **Create Knex Directories**
+    ```bash
+    mkdir -p src/db/migrations src/db/seeds
+    ```
+    *Reason: Creates directories for database migration and seed files.*
+
+6.  **Create Initial Migration**
+    ```bash
+    npm run knex migrate:make initial_schema
+    ```
+    *Reason: Creates the first migration file for the database schema.*
+
+7.  **Start Database Service**
+    ```bash
+    docker compose up -d db
+    ```
+    *Reason: Starts the database container in the background to allow for migrations.*
+
+8.  **Run Database Migrations**
+    ```bash
+    npm run knex migrate:latest
+    ```
+    *Reason: Applies the migrations to create the database schema.*
