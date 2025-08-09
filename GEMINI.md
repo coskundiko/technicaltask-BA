@@ -4,8 +4,8 @@ This project is a backend service to manage advertiser ad budgets, as per the te
 
 The implementation follows modern backend development best practices to showcase expertise, including:
 - **TypeScript** for robust, type-safe code.
+- **Fastify** as the high-performance web framework.
 - **Docker and Docker Compose** for a containerized, reproducible environment.
-- **Express.js** as the web framework.
 - **MySQL** as the relational database.
 - **Knex.js** as the SQL query builder.
 - **Zod** for declarative data validation.
@@ -17,11 +17,12 @@ The implementation follows modern backend development best practices to showcase
 
 **Phase 1: Foundation & Setup**
 1.  [x] Docker Environment (`Dockerfile`, `docker-compose.yml`)
-2.  [x] TypeScript Project (`npm init`, install dependencies)
-3.  [ ] TypeScript Config (`tsconfig.json`)
-4.  [ ] Project Structure (`src` folder, feature modules)
-5.  [ ] Knex Setup (`knexfile.ts`, initial migration)
-6.  [ ] Core Server (`src/app.ts` with middleware)
+2.  [x] TypeScript Project (`npm init`, initial dependencies)
+3.  [x] Dependency Swap (Express -> Fastify)
+4.  [ ] TypeScript Config (`tsconfig.json`)
+5.  [ ] Project Structure (`src` folder, feature modules)
+6.  [ ] Knex Setup (`knexfile.ts`, initial migration)
+7.  [ ] Core Server (`src/app.ts` with Fastify plugins)
 
 **Phase 2: Feature & API Endpoint Implementation**
 1.  [ ] `POST /topup`
@@ -54,14 +55,9 @@ This section documents the commands used to set up the initial project structure
     ```
     *Reason: Tests the Docker configuration. The expected build failure confirmed the setup.*
 
-4.  **Install Production Dependencies**
+4.  **Install Dependencies**
     ```bash
-    npm install express knex mysql2 zod helmet dotenv
+    npm install knex mysql2 zod dotenv fastify @fastify/helmet
+    npm install --save-dev typescript @types/node ts-node
     ```
-    *Reason: Installs production dependencies.*
-
-5.  **Install Development Dependencies**
-    ```bash
-    npm install --save-dev typescript @types/node @types/express ts-node
-    ```
-    *Reason: Installs development dependencies for TypeScript.*
+    *Reason: Installs the final production and development dependencies.*
