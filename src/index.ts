@@ -1,5 +1,10 @@
 import fastify from 'fastify';
 import helmet from '@fastify/helmet';
+import budgetRoutes from './features/budgets/budgets.routes';
+import {
+  serializerCompiler,
+  validatorCompiler,
+} from 'fastify-type-provider-zod';
 
 /**
  * This function builds and configures our Fastify server.
@@ -12,6 +17,10 @@ function buildServer() {
     logger: true,
   });
 
+  // Add Zod validation and serialization
+  server.setValidatorCompiler(validatorCompiler);
+  server.setSerializerCompiler(serializerCompiler);
+
   // The helmet plugin adds important security headers to every response.
   server.register(helmet);
 
@@ -19,6 +28,9 @@ function buildServer() {
   server.get('/healthcheck', async () => {
     return { status: 'ok' };
   });
+
+  // Register our feature routes
+  server.register(budgetRoutes, { prefix: '/api/budgets' });
 
   return server;
 }

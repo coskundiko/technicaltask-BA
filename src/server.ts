@@ -1,5 +1,5 @@
-import buildServer from './app';
-import { config } from './config';
+import buildServer from '@app/index';
+import { config } from '@app/config';
 
 const server = buildServer();
 

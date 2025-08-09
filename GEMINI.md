@@ -22,10 +22,10 @@ The implementation follows modern backend development best practices to showcase
 4.  [x] TypeScript Config (`tsconfig.json`)
 5.  [x] Project Structure (`src` folder, feature modules)
 6.  [x] Knex Setup (`knexfile.ts`, initial migration)
-7.  [ ] Core Server (`src/app.ts` with Fastify plugins)
+7.  [x] Core Server (`src/app.ts` with Fastify plugins)
 
 **Phase 2: Feature & API Endpoint Implementation**
-1.  [ ] `POST /topup`
+1.  [x] `POST /topup`
 2.  [ ] `GET /budgets/:advertiser_id`
 3.  [ ] `POST /campaigns`
 4.  [ ] `POST /simulate-day`
@@ -62,26 +62,38 @@ This section documents the commands used to set up the initial project structure
     ```
     *Reason: Installs the final production and development dependencies.*
 
-5.  **Create Knex Directories**
-    ```bash
-    mkdir -p src/db/migrations src/db/seeds
-    ```
-    *Reason: Creates directories for database migration and seed files.*
+5.  **Delete Old Schema**
+    *Reason: To start the schema refactor from a clean state.*
+    - Deleted the original migration and seed files.
 
-6.  **Create Initial Migration**
+6.  **Create New Migrations**
     ```bash
-    npm run knex migrate:make initial_schema
+    npm run knex migrate:make create_advertisers_table
+    npm run knex migrate:make create_budgets_table
+    npm run knex migrate:make create_campaigns_table
     ```
-    *Reason: Creates the first migration file for the database schema.*
+    *Reason: Creates separate migration files for each table.*
 
-7.  **Start Database Service**
+7.  **Create New Seed File**
+    ```bash
+    npm run knex seed:make initial_data
+    ```
+    *Reason: Creates a new seed file for test data.*
+
+8.  **Start Database Service**
     ```bash
     docker compose up -d db
     ```
-    *Reason: Starts the database container in the background to allow for migrations.*
+    *Reason: Starts the database container.*
 
-8.  **Run Database Migrations**
+9.  **Run Database Migrations**
     ```bash
     npm run knex migrate:latest
     ```
     *Reason: Applies the migrations to create the database schema.*
+
+10. **Run Database Seed**
+    ```bash
+    npm run knex seed:run
+    ```
+    *Reason: Populates the database with initial test data.*
