@@ -11,4 +11,4 @@ COPY package*.json ./
 RUN npm install --omit=dev
 COPY --from=builder /usr/src/app/dist ./dist
 EXPOSE 3000
-CMD [ "node", "dist/app.js" ]
+CMD [ "node", "dist/server.js" ]
