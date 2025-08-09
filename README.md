@@ -33,7 +33,7 @@ Submits a campaign to be scheduled.
 
 ```json
 {
-  "advertiser_id": "adv_001",
+  "advertiser_id": "1",
   "campaign_name": "My Retargeting Campaign",
   "cost": 4000
 }
@@ -67,7 +67,7 @@ Top up the advertiser's account.
 
 ```json
 {
-  "advertiser_id": "adv_001",
+  "advertiser_id": "1",
   "amount": 10000
 }
 ```
@@ -93,7 +93,7 @@ Returns advertiser’s full budget state.
 
 ```json
 {
-  "advertiser_id": "adv_001",
+  "advertiser_id": "1",
   "current_day": "2024-08-05",
   "daily_budget": 5000,
   "rollover_balance": 10000,
@@ -115,7 +115,7 @@ Simulates spending for non-campaign activities (e.g., analytics, reports).
 
 ```json
 {
-  "advertiser_id": "adv_001",
+  "advertiser_id": "1",
   "amount": 3000,
   "reason": "data export"
 }

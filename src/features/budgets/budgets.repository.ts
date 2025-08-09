@@ -43,3 +43,17 @@ export async function findOrCreateTodaysBudget(advertiserId: string) {
 
   return budget;
 }
+
+export async function getLatestBudget(advertiserId: string) {
+  return db('budgets')
+    .where({ advertiser_id: advertiserId })
+    .orderBy('current_day', 'desc')
+    .first();
+}
+
+export async function createBudgetForDay(advertiserId: string, day: string) {
+  return db('budgets').insert({
+    advertiser_id: advertiserId,
+    current_day: day,
+  });
+}

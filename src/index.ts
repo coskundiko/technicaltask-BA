@@ -1,6 +1,9 @@
 import fastify from 'fastify';
 import helmet from '@fastify/helmet';
 import budgetRoutes from './features/budgets/budgets.routes';
+import campaignRoutes from './features/campaigns/campaigns.routes';
+import simulationRoutes from './features/simulation/simulation.routes';
+import spendRoutes from './features/spend/spend.routes';
 import {
   serializerCompiler,
   validatorCompiler,
@@ -31,6 +34,9 @@ function buildServer() {
 
   // Register our feature routes
   server.register(budgetRoutes, { prefix: '/api/budgets' });
+  server.register(campaignRoutes, { prefix: '/api/campaigns' });
+  server.register(simulationRoutes, { prefix: '/api' });
+  server.register(spendRoutes, { prefix: '/api' });
 
   return server;
 }

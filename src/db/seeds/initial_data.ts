@@ -6,18 +6,14 @@ export async function seed(knex: Knex): Promise<void> {
   await knex('budgets').del();
   await knex('advertisers').del();
 
-  // Insert initial advertiser
-  await knex('advertisers').insert({
-    id: 1, // Use the ID from the README example
-    balance: 0, // Start with 0 balance
-  });
+  await knex('advertisers').insert({ id: '1', balance: 0.0 });
+  await knex('advertisers').insert({ id: '2', balance: 0.0 });
 
-  // Insert initial budget for adv_001 for a specific day
-  // This assumes the current_day in the budget table is a DATE type
-  await knex('budgets').insert({
-    advertiser_id: 1,
-    current_day: '2024-08-05',
-    daily_budget: 5000,
-    used_today: 0,
-  });
+  // Example: Initial budget for adv_001 for today
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayString = yesterday.toISOString().slice(0, 10);
+  await knex('budgets').insert([
+    { advertiser_id: '1', current_day: yesterdayString, daily_budget: 5000.0, used_today: 0.0 },
+  ]);
 }

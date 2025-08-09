@@ -12,7 +12,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string("campaign_name").notNullable();
     table.decimal("cost", 10, 2).notNullable();
     table.enum("status", ["scheduled", "deferred", "completed"]).notNullable();
-    table.date("scheduled_for").notNullable();
+    table.date("scheduled_for");
+    table.string("reason").nullable();
     table.timestamp("created_at").defaultTo(knex.fn.now());
   });
 }
