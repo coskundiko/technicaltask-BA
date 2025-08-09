@@ -9,6 +9,7 @@ The implementation follows modern backend development best practices to showcase
 - **MySQL** as the relational database.
 - **Knex.js** as the SQL query builder.
 - **Zod** for declarative data validation.
+- **Fastify Type Provider Zod** for seamless Zod integration with Fastify.
 - A feature-based, scalable project architecture.
 
 ---
@@ -26,7 +27,7 @@ The implementation follows modern backend development best practices to showcase
 
 **Phase 2: Feature & API Endpoint Implementation**
 1.  [x] `POST /topup`
-2.  [ ] `GET /budgets/:advertiser_id`
+2.  [x] `GET /budgets/:advertiser_id`
 3.  [ ] `POST /campaigns`
 4.  [ ] `POST /simulate-day`
 5.  [ ] `GET /campaigns`
@@ -57,16 +58,21 @@ This section documents the commands used to set up the initial project structure
 
 4.  **Install Dependencies**
     ```bash
-    npm install knex mysql2 zod dotenv fastify @fastify/helmet
+    npm install knex mysql2 zod dotenv fastify @fastify/helmet fastify-type-provider-zod
     npm install --save-dev typescript @types/node ts-node
     ```
     *Reason: Installs the final production and development dependencies.*
 
-5.  **Delete Old Schema**
-    *Reason: To start the schema refactor from a clean state.*
-    - Deleted the original migration and seed files.
+5.  **Create Knex Directories**
+    ```bash
+    mkdir -p src/db/migrations src/db/seeds
+    ```
+    *Reason: Creates directories for database migration and seed files.*
 
-6.  **Create New Migrations**
+6.  **Move knexfile.ts to src/**
+    *Reason: Organizes the knexfile within the source directory.*
+
+7.  **Create New Migrations**
     ```bash
     npm run knex migrate:make create_advertisers_table
     npm run knex migrate:make create_budgets_table
@@ -74,25 +80,25 @@ This section documents the commands used to set up the initial project structure
     ```
     *Reason: Creates separate migration files for each table.*
 
-7.  **Create New Seed File**
+8.  **Create New Seed File**
     ```bash
     npm run knex seed:make initial_data
     ```
     *Reason: Creates a new seed file for test data.*
 
-8.  **Start Database Service**
+9.  **Start Database Service**
     ```bash
     docker compose up -d db
     ```
-    *Reason: Starts the database container.*
+    *Reason: Starts the database container in the background to allow for migrations.*
 
-9.  **Run Database Migrations**
+10. **Run Database Migrations**
     ```bash
     npm run knex migrate:latest
     ```
     *Reason: Applies the migrations to create the database schema.*
 
-10. **Run Database Seed**
+11. **Run Database Seed**
     ```bash
     npm run knex seed:run
     ```

@@ -13,3 +13,33 @@ export async function topUpBalance(advertiserId: string, amount: number) {
 
   return result;
 }
+
+export async function getAdvertiser(advertiserId: string) {
+  return db('advertisers').where({ id: advertiserId }).first();
+}
+
+export async function findOrCreateTodaysBudget(advertiserId: string) {
+  const today = new Date().toISOString().slice(0, 10); // Get YYYY-MM-DD
+
+  let budget = await db('budgets')
+    .where({
+      advertiser_id: advertiserId,
+      current_day: today,
+    })
+    .first();
+
+  if (!budget) {
+    await db('budgets').insert({
+      advertiser_id: advertiserId,
+      current_day: today,
+    });
+    budget = await db('budgets')
+      .where({
+        advertiser_id: advertiserId,
+        current_day: today,
+      })
+      .first();
+  }
+
+  return budget;
+}
