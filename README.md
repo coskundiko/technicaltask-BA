@@ -80,7 +80,7 @@ The system operates on a set of clear rules for managing advertiser funds.
 
 All requests and responses are in JSON format.
 
-### `POST /topup`
+### `POST /api/budgets/topup`
 Adds funds to an advertiser's rollover balance.
 
 **Request Body:**
@@ -93,7 +93,7 @@ Adds funds to an advertiser's rollover balance.
 
 **`curl` Example:**
 ```bash
-curl -X POST http://localhost:3000/topup \
+curl -X POST http://localhost:3000/api/budgets/topup \
 -H "Content-Type: application/json" \
 -d '{"advertiser_id": "1", "amount": 10000}'
 ```
@@ -105,12 +105,12 @@ curl -X POST http://localhost:3000/topup \
 }
 ```
 
-### `GET /budgets/:advertiser_id`
+### `GET /api/budgets/:advertiser_id`
 Retrieves the complete budget state for an advertiser.
 
 **`curl` Example:**
 ```bash
-curl http://localhost:3000/budgets/1
+curl http://localhost:3000/api/budgets/1
 ```
 
 **Response:**
@@ -126,7 +126,7 @@ curl http://localhost:3000/budgets/1
 }
 ```
 
-### `POST /campaigns`
+### `POST /api/campaigns`
 Submits a new campaign. It will be scheduled or deferred based on the available budget.
 
 **Request Body:**
@@ -140,7 +140,7 @@ Submits a new campaign. It will be scheduled or deferred based on the available 
 
 **`curl` Example:**
 ```bash
-curl -X POST http://localhost:3000/campaigns \
+curl -X POST http://localhost:3000/api/campaigns \
 -H "Content-Type: application/json" \
 -d '{"advertiser_id": "1", "campaign_name": "My Awesome Campaign", "cost": 3000}'
 ```
@@ -168,7 +168,7 @@ Retrieves a list of all campaigns and their current status.
 
 **`curl` Example:**
 ```bash
-curl http://localhost:3000/campaigns
+curl http://localhost:3000/api/campaigns
 ```
 
 **Response:**
@@ -192,7 +192,7 @@ Simulates the passage of one full day. This triggers the daily budget reset, rol
 
 **`curl` Example:**
 ```bash
-curl -X POST http://localhost:3000/simulate-day
+curl -X POST http://localhost:3000/api/simulate-day
 ```
 
 **Response:**
