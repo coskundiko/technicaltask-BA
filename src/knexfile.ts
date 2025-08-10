@@ -12,6 +12,7 @@ const config: { [key: string]: Knex.Config } = {
       user: process.env.DB_USER || 'root',
       password: process.env.DB_PASSWORD || 'password',
       database: process.env.DB_NAME || 'advertiser_budgets',
+      dateStrings: true,
     },
     migrations: {
       directory: './db/migrations',
