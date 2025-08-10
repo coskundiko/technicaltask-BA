@@ -1,200 +1,99 @@
-# TECHNICAL INTERVIEW TASK: Ad Budget Manager with Daily Budget and Rollover
+# Ad Budget Manager (Software Engineering Challenge)
 
-## Company Context
+A backend service to manage advertiser ad budgets, as per the technical task instructions. It implements a system for daily budgets, rollovers, campaign submissions, and top-ups.
 
-At Blockchain Ads (BCA), advertisers run paid campaigns that spend real ad dollars. Each ad campaign has an associated cost, and advertisers must **top up their account balance** in order to run campaigns.
+The implementation focuses on a clean architecture, clear API endpoints, and uses Docker for the database for easy development and testing.
 
-The system enforces:
-- A **$5,000/day default daily ad budget** for each advertiser
-- **Unused daily budget rolls over** and adds to the next day’s available balance
-- Advertisers can manually **top up their balance**, minimum $10,000 per top-up
-- If there isn’t enough available budget for a campaign, the campaign is **deferred** until there is
+## Approach
 
-This task is about building a simplified backend system to manage ad spend, daily budgets, rollover, and top-ups.
+The backend is a web server using the Fastify framework. The core logic is implemented to handle budget and campaign management. The data is stored in a MySQL database.
 
-## Your Task
+Key decisions:
+- Modular, feature-based architecture (`src/features`).
+- Type-safe code with TypeScript.
+- Knex.js for database query building.
+- Zod for data validation.
+- Containerized database with Docker.
 
-Build a simplified backend service that:
+---
 
-1. Accepts campaign submissions with a cost
-2. Tracks each advertiser’s available balance
-3. Schedules or defers campaigns based on available balance
-4. Supports manual top-ups
-5. Simulates the passing of days (e.g. nightly system tick)
-6. Supports other non-campaign spend (optional)
+## Core Dependencies
 
-## What You Need to Build
+- **`fastify`**: The web framework used for routing and handling HTTP requests.
+- **`knex`**: A SQL query builder for Node.js.
+- **`mysql2`**: MySQL client for Node.js.
+- **`zod`**: TypeScript-first schema declaration and validation library.
+- **`dotenv`**: A zero-dependency module that loads environment variables from a `.env` file.
+- **`@fastify/helmet`**: Helmet for Fastify.
+- **`fastify-type-provider-zod`**: Type provider for Zod schemas in Fastify.
 
-### 1. POST /campaigns
+---
 
-Submits a campaign to be scheduled.
+## File Structure
 
-**Request:**
-
-```json
-{
-  "advertiser_id": "1",
-  "campaign_name": "My Retargeting Campaign",
-  "cost": 4000
-}
+```
+.
+├── docker-compose.yml
+├── package.json
+├── README.md
+├── tsconfig.json
+└── src
+    ├── features
+    │   ├── budgets
+    │   ├── campaigns
+    │   ├── simulation
+    │   └── spend
+    ├── db
+    │   ├── migrations
+    │   └── seeds
+    ├── config
+    ├── server.ts
+    └── index.ts
 ```
 
-**Response (scheduled):**
+---
 
-```json
-{
-  "status": "scheduled",
-  "scheduled_for": "2024-08-05",
-  "balance_remaining": 1000
-}
-```
+## API Endpoints
 
-**Response (deferred):**
+| Method | Path                      | Description                                  |
+|--------|---------------------------|----------------------------------------------|
+| `POST` | `/topup`                  | Tops up an advertiser's budget.              |
+| `GET`  | `/budgets/:advertiser_id` | Returns the current budget for an advertiser.|
+| `POST` | `/campaigns`              | Creates a new campaign.                      |
+| `GET`  | `/campaigns`              | Returns all campaigns.                       |
+| `POST` | `/simulate-day`           | Simulates a day of spending.                 |
+| `POST` | `/spend`                  | Spends from a campaign's budget.             |
 
-```json
-{
-  "status": "deferred",
-  "scheduled_for": "2024-08-06",
-  "reason": "insufficient_balance"
-}
-```
+---
 
-### 2. POST /topup
+## How to Run
 
-Top up the advertiser's account.
+### Locally
 
-**Request:**
+1.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-```json
-{
-  "advertiser_id": "1",
-  "amount": 10000
-}
-```
+2.  **Start the database service:**
+    ```bash
+    docker compose up -d db
+    ```
 
-**Rules:**
-- Minimum top-up: $10,000
-- Top-up is added to the advertiser's **rollover balance**
+3.  **Run database migrations:**
+    ```bash
+    npm run knex migrate:latest
+    ```
 
-### 3. POST /simulate-day
+4.  **Seed the database with initial data:**
+    ```bash
+    npm run knex seed:run
+    ```
 
-Simulates passage of one day.
+5.  **Start the application in development mode:**
+    ```bash
+    npm run dev
+    ```
 
-Logic to apply:
-- Add $5,000 to daily budget
-- Add unused budget to rollover
-- Attempt to reschedule previously deferred campaigns
+The application will be available at `http://localhost:3000`.
 
-### 4. GET /budgets/:advertiser_id
-
-Returns advertiser’s full budget state.
-
-**Response:**
-
-```json
-{
-  "advertiser_id": "1",
-  "current_day": "2024-08-05",
-  "daily_budget": 5000,
-  "rollover_balance": 10000,
-  "total_available": 15000,
-  "used_today": 4000,
-  "remaining_today": 11000
-}
-```
-
-### 5. GET /campaigns
-
-Returns all campaign submissions and their statuses (scheduled, deferred, completed).
-
-### 6. POST /spend (optional)
-
-Simulates spending for non-campaign activities (e.g., analytics, reports).
-
-**Request:**
-
-```json
-{
-  "advertiser_id": "1",
-  "amount": 3000,
-  "reason": "data export"
-}
-```
-
-**Response:**
-
-```json
-{
-  "status": "success",
-  "remaining_today": 2000
-}
-```
-
-Or:
-
-```json
-{
-  "status": "rejected",
-  "reason": "insufficient_balance"
-}
-```
-
-## Sample Scenarios
-
-### Scenario 1 – Single Day Spend
-Day 1:
-- $5,000 daily budget
-- Campaign A ($3,000) → scheduled
-- Campaign B ($4,000) → deferred
-- Remaining balance: $2,000
-
-### Scenario 2 – Top-Up & Rollover
-Advertiser tops up $10,000.  
-Next day:
-- Daily budget: $5,000 + Rollover: $2,000 + Top-Up: $10,000
-- Campaign B ($4,000) now fits → scheduled
-
-### Scenario 3 – Overspend via /spend
-Advertiser has $6,000.  
-Spends $5,000 on a report → allowed  
-Attempts to launch $2,000 campaign → deferred
-
-## Expectations
-
-This task is about backend logic and architecture. UI and polish are not necessary.
-
-You should:
-- Use Python or Node.js (JavaScript/TypeScript)
-- Use a real database or mock with repository abstraction
-- Separate business logic from routing
-- Cleanly simulate budget rollovers, campaign queueing, and top-ups
-
-## Using AI / Vibe Coding
-
-You can use AI tools to help scaffold, write boilerplate, and assist you.
-
-However:
-- You must understand and verify what’s written
-- If you use AI, your code should be **cleaner and better**, not sloppier
-
-## What We’re Evaluating
-
-| Area            | Expectation                                                      |
-|------------------|-------------------------------------------------------------------|
-| Architecture     | Logical separation of concerns (campaigns, budgets, time)        |
-| Code Quality     | Readable, modular, testable                                      |
-| Budget Logic     | Rollover, top-up enforcement, correct deferring behavior         |
-| Scheduling       | Campaigns are scheduled or deferred correctly                    |
-| Clarity          | Clean README, sample requests, setup instructions                |
-
-## Deliverables
-
-- GitHub repo (public or private invite)
-- README.md with:
-    - Setup instructions
-    - Sample curl/Postman commands
-    - Notes on how budget rollover and top-ups work
-
-## Time Estimate
-
-4–6 hours, especially with effective use of AI tools.

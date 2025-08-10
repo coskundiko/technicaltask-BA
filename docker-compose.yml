@@ -1,25 +1,6 @@
 version: '3.8'
 
 services:
-  app:
-    build:
-      context: .
-      target: builder
-    command: npm run dev
-    ports:
-      - "3000:3000"
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-    depends_on:
-      - db
-    environment:
-      - DB_HOST=db
-      - DB_USER=root
-      - DB_PASSWORD=password
-      - DB_NAME=advertiser_budgets
-      - NODE_ENV=development
-
   db:
     image: mysql:8.0
     restart: always
