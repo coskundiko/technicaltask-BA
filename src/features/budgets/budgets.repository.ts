@@ -57,3 +57,7 @@ export async function createBudgetForDay(advertiserId: string, day: string) {
     current_day: day,
   });
 }
+
+export async function getBudgetForDay(advertiserId: string, day: string) {
+  return db('budgets').where({ advertiser_id: advertiserId, current_day: day }).first();
+}

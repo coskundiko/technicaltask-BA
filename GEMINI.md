@@ -28,12 +28,12 @@ The implementation follows modern backend development best practices to showcase
 **Phase 2: Feature & API Endpoint Implementation**
 1.  [x] `POST /topup`
 2.  [x] `GET /budgets/:advertiser_id`
-3.  [ ] `POST /campaigns`
-4.  [ ] `POST /simulate-day`
-5.  [ ] `GET /campaigns`
+3.  [x] `POST /campaigns`
+4.  [x] `POST /simulate-day`
+5.  [x] `GET /campaigns`
 
 **Phase 3: Documentation**
-1.  [ ] Update `README.md` with setup and usage instructions.
+1.  [x] Update `README.md` with setup and usage instructions.
 
 ---
 
