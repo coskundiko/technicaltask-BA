@@ -80,7 +80,7 @@ The system operates on a set of clear rules for managing advertiser funds.
 
 All requests and responses are in JSON format.
 
-### `POST /api/budgets/topup`
+### `POST /budgets/topup`
 Adds funds to an advertiser's rollover balance.
 
 **Request Body:**
@@ -105,7 +105,7 @@ curl -X POST http://localhost:3000/api/budgets/topup \
 }
 ```
 
-### `GET /api/budgets/:advertiser_id`
+### `GET /budgets/:advertiser_id`
 Retrieves the complete budget state for an advertiser.
 
 **`curl` Example:**
@@ -126,7 +126,7 @@ curl http://localhost:3000/api/budgets/1
 }
 ```
 
-### `POST /api/campaigns`
+### `POST /campaigns`
 Submits a new campaign. It will be scheduled or deferred based on the available budget.
 
 **Request Body:**
