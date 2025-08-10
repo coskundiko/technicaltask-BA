@@ -20,3 +20,9 @@ export async function updateBudgetUsedToday(advertiserId: string, currentDay: st
 export async function getAllCampaigns() {
   return db('campaigns').select('*');
 }
+
+export async function getDeferredCampaigns(advertiserId: string) {
+  return db('campaigns')
+    .where({ advertiser_id: advertiserId, status: 'deferred' })
+    .orderBy('created_at', 'asc');
+}
