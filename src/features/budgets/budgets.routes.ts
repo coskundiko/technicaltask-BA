@@ -1,44 +1,37 @@
-import { FastifyInstance, FastifyPluginAsync } from 'fastify';
-import { Knex } from 'knex';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import db from '@app/db';
 import { BudgetsController } from './budgets.controller';
 import { BudgetsService } from './budgets.service';
 import { BudgetsRepository } from './budgets.repository';
-import { topUpSchema, getBudgetParamsSchema } from './budgets.validation';
+import { topUpSchema, getBudgetParamsSchema, TopUpInput, GetBudgetParams } from './budgets.validation';
 
-export class BudgetsRoutes {
-  constructor(private budgetsController: BudgetsController) {}
+async function budgetRoutes(server: FastifyInstance) {
+  // Initialize dependencies internally
+  const budgetsRepository = new BudgetsRepository(db);
+  const budgetsService = new BudgetsService(budgetsRepository);
+  const budgetsController = new BudgetsController(budgetsService);
 
-  async register(server: FastifyInstance) {
-    server.post(
-      '/topup',
-      {
-        schema: {
-          body: topUpSchema,
-        },
+  server.post(
+    '/topup',
+    {
+      schema: {
+        body: topUpSchema,
       },
-      this.budgetsController.topUpController.bind(this.budgetsController)
-    );
+    },
+    (request: FastifyRequest<{ Body: TopUpInput }>, reply: FastifyReply) => 
+      budgetsController.topUpController(request, reply)
+  );
 
-    server.get(
-      '/:advertiser_id',
-      {
-        schema: {
-          params: getBudgetParamsSchema,
-        },
+  server.get(
+    '/:advertiser_id',
+    {
+      schema: {
+        params: getBudgetParamsSchema,
       },
-      this.budgetsController.getBudgetController.bind(this.budgetsController)
-    );
-  }
+    },
+    (request: FastifyRequest<{ Params: GetBudgetParams }>, reply: FastifyReply) => 
+      budgetsController.getBudgetController(request, reply)
+  );
 }
 
-// Factory function for clean dependency injection
-export function createBudgetRoutes(db: Knex): FastifyPluginAsync {
-  return async (server: FastifyInstance) => {
-    const budgetsRepository = new BudgetsRepository(db);
-    const budgetsService = new BudgetsService(budgetsRepository);
-    const budgetsController = new BudgetsController(budgetsService);
-    const budgetsRoutes = new BudgetsRoutes(budgetsController);
-    
-    await budgetsRoutes.register(server);
-  };
-}
+export default budgetRoutes;

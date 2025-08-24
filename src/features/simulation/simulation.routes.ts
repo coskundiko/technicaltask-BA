@@ -1,30 +1,22 @@
-import { FastifyInstance, FastifyPluginAsync } from 'fastify';
-import { Knex } from 'knex';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import db from '@app/db';
 import { SimulationController } from './simulation.controller';
 import { SimulationService } from './simulation.service';
 import { BudgetsRepository } from '@app/features/budgets/budgets.repository';
 import { CampaignsRepository } from '@app/features/campaigns/campaigns.repository';
 
-export class SimulationRoutes {
-  constructor(private simulationController: SimulationController) {}
+async function simulationRoutes(server: FastifyInstance) {
+  // Initialize dependencies internally
+  const budgetsRepository = new BudgetsRepository(db);
+  const campaignsRepository = new CampaignsRepository(db);
+  const simulationService = new SimulationService(db, budgetsRepository, campaignsRepository);
+  const simulationController = new SimulationController(simulationService);
 
-  async register(server: FastifyInstance) {
-    server.post(
-      '/simulate-day',
-      this.simulationController.simulateDayController.bind(this.simulationController)
-    );
-  }
+  server.post(
+    '/simulate-day',
+    (request: FastifyRequest, reply: FastifyReply) => 
+      simulationController.simulateDayController(request, reply)
+  );
 }
 
-// Factory function for clean dependency injection
-export function createSimulationRoutes(db: Knex): FastifyPluginAsync {
-  return async (server: FastifyInstance) => {
-    const budgetsRepository = new BudgetsRepository(db);
-    const campaignsRepository = new CampaignsRepository(db);
-    const simulationService = new SimulationService(db, budgetsRepository, campaignsRepository);
-    const simulationController = new SimulationController(simulationService);
-    const simulationRoutes = new SimulationRoutes(simulationController);
-    
-    await simulationRoutes.register(server);
-  };
-}
+export default simulationRoutes;
