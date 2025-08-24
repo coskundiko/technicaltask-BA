@@ -1,18 +1,17 @@
 
-import { Knex } from 'knex';
+import db from '@app/db';
 import { BudgetsRepository } from '@app/features/budgets/budgets.repository';
 import { CampaignsRepository } from '@app/features/campaigns/campaigns.repository';
 
 export class SimulationService {
   constructor(
-    private db: Knex,
     private budgetsRepository: BudgetsRepository,
     private campaignsRepository: CampaignsRepository
   ) {}
 
   async simulateDay() {
     console.log('Starting day simulation...');
-    const advertisers = await this.db('advertisers').select('id', 'balance');
+    const advertisers = await db('advertisers').select('id', 'balance');
     console.log(`Found ${advertisers.length} advertisers.`);
 
     for (const advertiser of advertisers) {
@@ -30,7 +29,7 @@ export class SimulationService {
 
         if (unusedBudget > 0) {
           newBalance += unusedBudget;
-          await this.db('advertisers')
+          await db('advertisers')
             .where({ id: advertiser.id })
             .update({ balance: newBalance });
           console.log(`Updated balance for ${advertiser.id}: ${newBalance}`);
@@ -86,12 +85,12 @@ export class SimulationService {
 
       if (campaignCost <= remainingDailyBudget + remainingBalance) {
         // Schedule the campaign
-        await this.db('campaigns')
+        await db('campaigns')
           .where({ id: campaign.id })
           .update({ status: 'scheduled', scheduled_for: currentDay, reason: null });
 
         // Update budget usage
-        await this.db('budgets')
+        await db('budgets')
           .where({ id: newDayBudget.id })
           .increment('used_today', campaignCost);
 
@@ -104,7 +103,7 @@ export class SimulationService {
           remainingBalance -= fromBalance;
 
           // Update the advertiser's main balance
-          await this.db('advertisers').where({ id: advertiserId }).update({ balance: remainingBalance });
+          await db('advertisers').where({ id: advertiserId }).update({ balance: remainingBalance });
         }
 
         console.log(`Campaign ${campaign.id} scheduled for ${currentDay}.`);

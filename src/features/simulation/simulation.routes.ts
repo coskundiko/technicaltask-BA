@@ -1,5 +1,4 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import db from '@app/db';
+import { FastifyInstance } from 'fastify';
 import { SimulationController } from './simulation.controller';
 import { SimulationService } from './simulation.service';
 import { BudgetsRepository } from '@app/features/budgets/budgets.repository';
@@ -7,15 +6,14 @@ import { CampaignsRepository } from '@app/features/campaigns/campaigns.repositor
 
 async function simulationRoutes(server: FastifyInstance) {
   // Initialize dependencies internally
-  const budgetsRepository = new BudgetsRepository(db);
-  const campaignsRepository = new CampaignsRepository(db);
-  const simulationService = new SimulationService(db, budgetsRepository, campaignsRepository);
+  const budgetsRepository = new BudgetsRepository();
+  const campaignsRepository = new CampaignsRepository();
+  const simulationService = new SimulationService(budgetsRepository, campaignsRepository);
   const simulationController = new SimulationController(simulationService);
 
   server.post(
     '/simulate-day',
-    (request: FastifyRequest, reply: FastifyReply) => 
-      simulationController.simulateDayController(request, reply)
+    simulationController.simulateDayController
   );
 }
 

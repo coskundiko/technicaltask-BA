@@ -1,16 +1,15 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import db from '@app/db';
+import { FastifyInstance } from 'fastify';
 import { CampaignsController } from './campaigns.controller';
 import { CampaignsService } from './campaigns.service';
 import { CampaignsRepository } from './campaigns.repository';
 import { BudgetsService } from '@app/features/budgets/budgets.service';
 import { BudgetsRepository } from '@app/features/budgets/budgets.repository';
-import { createCampaignSchema, CreateCampaignInput } from './campaigns.validation';
+import { createCampaignSchema } from './campaigns.validation';
 
 async function campaignRoutes(server: FastifyInstance) {
   // Initialize dependencies internally
-  const campaignsRepository = new CampaignsRepository(db);
-  const budgetsRepository = new BudgetsRepository(db);
+  const campaignsRepository = new CampaignsRepository();
+  const budgetsRepository = new BudgetsRepository();
   const budgetsService = new BudgetsService(budgetsRepository);
   const campaignsService = new CampaignsService(campaignsRepository, budgetsService);
   const campaignsController = new CampaignsController(campaignsService);
@@ -22,14 +21,12 @@ async function campaignRoutes(server: FastifyInstance) {
         body: createCampaignSchema,
       },
     },
-    (request: FastifyRequest<{ Body: CreateCampaignInput }>, reply: FastifyReply) => 
-      campaignsController.createCampaignController(request, reply)
+    campaignsController.createCampaignController
   );
 
   server.get(
     '/',
-    (request: FastifyRequest, reply: FastifyReply) => 
-      campaignsController.getCampaignsController(request, reply)
+    campaignsController.getCampaignsController
   );
 }
 

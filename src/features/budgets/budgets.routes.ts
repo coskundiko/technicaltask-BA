@@ -1,13 +1,12 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import db from '@app/db';
+import { FastifyInstance } from 'fastify';
 import { BudgetsController } from './budgets.controller';
 import { BudgetsService } from './budgets.service';
 import { BudgetsRepository } from './budgets.repository';
-import { topUpSchema, getBudgetParamsSchema, TopUpInput, GetBudgetParams } from './budgets.validation';
+import { topUpSchema, getBudgetParamsSchema } from './budgets.validation';
 
 async function budgetRoutes(server: FastifyInstance) {
   // Initialize dependencies internally
-  const budgetsRepository = new BudgetsRepository(db);
+  const budgetsRepository = new BudgetsRepository();
   const budgetsService = new BudgetsService(budgetsRepository);
   const budgetsController = new BudgetsController(budgetsService);
 
@@ -18,8 +17,7 @@ async function budgetRoutes(server: FastifyInstance) {
         body: topUpSchema,
       },
     },
-    (request: FastifyRequest<{ Body: TopUpInput }>, reply: FastifyReply) => 
-      budgetsController.topUpController(request, reply)
+    budgetsController.topUpController
   );
 
   server.get(
@@ -29,8 +27,7 @@ async function budgetRoutes(server: FastifyInstance) {
         params: getBudgetParamsSchema,
       },
     },
-    (request: FastifyRequest<{ Params: GetBudgetParams }>, reply: FastifyReply) => 
-      budgetsController.getBudgetController(request, reply)
+    budgetsController.getBudgetController
   );
 }
 

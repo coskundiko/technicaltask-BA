@@ -1,11 +1,9 @@
-import { Knex } from 'knex';
+import db from '@app/db';
 
 export class BudgetsRepository {
-  constructor(private db: Knex) {}
-
   async topUpBalance(advertiserId: string, amount: number) {
     // With the new schema, we directly increment the balance on the advertiser's main record.
-    const result = await this.db('advertisers')
+    const result = await db('advertisers')
       .where({ id: advertiserId })
       .increment('balance', amount);
 
@@ -18,13 +16,13 @@ export class BudgetsRepository {
   }
 
   async getAdvertiser(advertiserId: string) {
-    return this.db('advertisers').where({ id: advertiserId }).first();
+    return db('advertisers').where({ id: advertiserId }).first();
   }
 
   async findOrCreateTodaysBudget(advertiserId: string) {
     const today = new Date().toISOString().slice(0, 10); // Get YYYY-MM-DD
 
-    let budget = await this.db('budgets')
+    let budget = await db('budgets')
       .where({
         advertiser_id: advertiserId,
         current_day: today,
@@ -32,11 +30,11 @@ export class BudgetsRepository {
       .first();
 
     if (!budget) {
-      await this.db('budgets').insert({
+      await db('budgets').insert({
         advertiser_id: advertiserId,
         current_day: today,
       });
-      budget = await this.db('budgets')
+      budget = await db('budgets')
         .where({
           advertiser_id: advertiserId,
           current_day: today,
@@ -48,20 +46,20 @@ export class BudgetsRepository {
   }
 
   async getLatestBudget(advertiserId: string) {
-    return this.db('budgets')
+    return db('budgets')
       .where({ advertiser_id: advertiserId })
       .orderBy('current_day', 'desc')
       .first();
   }
 
   async createBudgetForDay(advertiserId: string, day: string) {
-    return this.db('budgets').insert({
+    return db('budgets').insert({
       advertiser_id: advertiserId,
       current_day: day,
     });
   }
 
   async getBudgetForDay(advertiserId: string, day: string) {
-    return this.db('budgets').where({ advertiser_id: advertiserId, current_day: day }).first();
+    return db('budgets').where({ advertiser_id: advertiserId, current_day: day }).first();
   }
 }
