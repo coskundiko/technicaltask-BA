@@ -1,28 +1,35 @@
-import { getBudgetState } from '@app/features/budgets/budgets.service';
-import { updateUsedToday } from './spend.repository';
+import { BudgetsService } from '@app/features/budgets/budgets.service';
+import { SpendRepository } from './spend.repository';
 
-export async function processSpend(
-  advertiserId: string,
-  amount: number,
-) {
-  const budgetState = await getBudgetState(advertiserId);
+export class SpendService {
+  constructor(
+    private spendRepository: SpendRepository,
+    private budgetsService: BudgetsService
+  ) {}
 
-  if (!budgetState) {
-    throw new Error('Advertiser not found');
-  }
+  async processSpend(
+    advertiserId: string,
+    amount: number,
+  ) {
+    const budgetState = await this.budgetsService.getBudgetState(advertiserId);
 
-  const { remaining_today, current_day } = budgetState;
+    if (!budgetState) {
+      throw new Error('Advertiser not found');
+    }
 
-  if (amount <= remaining_today) {
-    await updateUsedToday(advertiserId, current_day, amount);
-    return {
-      status: 'success',
-      remaining_today: remaining_today - amount,
-    };
-  } else {
-    return {
-      status: 'rejected',
-      reason: 'insufficient_balance',
-    };
+    const { remaining_today, current_day } = budgetState;
+
+    if (amount <= remaining_today) {
+      await this.spendRepository.updateUsedToday(advertiserId, current_day, amount);
+      return {
+        status: 'success',
+        remaining_today: remaining_today - amount,
+      };
+    } else {
+      return {
+        status: 'rejected',
+        reason: 'insufficient_balance',
+      };
+    }
   }
 }

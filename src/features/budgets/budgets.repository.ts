@@ -1,63 +1,67 @@
-import db from '@app/db';
+import { Knex } from 'knex';
 
-export async function topUpBalance(advertiserId: string, amount: number) {
-  // With the new schema, we directly increment the balance on the advertiser's main record.
-  const result = await db('advertisers')
-    .where({ id: advertiserId })
-    .increment('balance', amount);
+export class BudgetsRepository {
+  constructor(private db: Knex) {}
 
-  // Check if any row was updated. If not, the advertiser was not found.
-  if (result === 0) {
-    throw new Error(`Advertiser with ID ${advertiserId} not found.`);
+  async topUpBalance(advertiserId: string, amount: number) {
+    // With the new schema, we directly increment the balance on the advertiser's main record.
+    const result = await this.db('advertisers')
+      .where({ id: advertiserId })
+      .increment('balance', amount);
+
+    // Check if any row was updated. If not, the advertiser was not found.
+    if (result === 0) {
+      throw new Error(`Advertiser with ID ${advertiserId} not found.`);
+    }
+
+    return result;
   }
 
-  return result;
-}
+  async getAdvertiser(advertiserId: string) {
+    return this.db('advertisers').where({ id: advertiserId }).first();
+  }
 
-export async function getAdvertiser(advertiserId: string) {
-  return db('advertisers').where({ id: advertiserId }).first();
-}
+  async findOrCreateTodaysBudget(advertiserId: string) {
+    const today = new Date().toISOString().slice(0, 10); // Get YYYY-MM-DD
 
-export async function findOrCreateTodaysBudget(advertiserId: string) {
-  const today = new Date().toISOString().slice(0, 10); // Get YYYY-MM-DD
-
-  let budget = await db('budgets')
-    .where({
-      advertiser_id: advertiserId,
-      current_day: today,
-    })
-    .first();
-
-  if (!budget) {
-    await db('budgets').insert({
-      advertiser_id: advertiserId,
-      current_day: today,
-    });
-    budget = await db('budgets')
+    let budget = await this.db('budgets')
       .where({
         advertiser_id: advertiserId,
         current_day: today,
       })
       .first();
+
+    if (!budget) {
+      await this.db('budgets').insert({
+        advertiser_id: advertiserId,
+        current_day: today,
+      });
+      budget = await this.db('budgets')
+        .where({
+          advertiser_id: advertiserId,
+          current_day: today,
+        })
+        .first();
+    }
+
+    return budget;
   }
 
-  return budget;
-}
+  async getLatestBudget(advertiserId: string) {
+    return this.db('budgets')
+      .where({ advertiser_id: advertiserId })
+      .orderBy('current_day', 'desc')
+      .first();
+  }
 
-export async function getLatestBudget(advertiserId: string) {
-  return db('budgets')
-    .where({ advertiser_id: advertiserId })
-    .orderBy('current_day', 'desc')
-    .first();
-}
+  async createBudgetForDay(advertiserId: string, day: string) {
+    return this.db('budgets').insert({
+      advertiser_id: advertiserId,
+      current_day: day,
+    });
+  }
 
-export async function createBudgetForDay(advertiserId: string, day: string) {
-  return db('budgets').insert({
-    advertiser_id: advertiserId,
-    current_day: day,
-  });
-}
-
-export async function getBudgetForDay(advertiserId: string, day: string) {
-  return db('budgets').where({ advertiser_id: advertiserId, current_day: day }).first();
+  async getBudgetForDay(advertiserId: string, day: string) {
+    return this.db('budgets').where({ advertiser_id: advertiserId, current_day: day }).first();
+  }
 }

@@ -1,19 +1,23 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { SpendInput } from './spend.validation';
-import { processSpend } from './spend.service';
+import { SpendService } from './spend.service';
 
-export async function spendController(
-  request: FastifyRequest<{ Body: SpendInput }>,
-  reply: FastifyReply
-) {
-  try {
-    const { advertiser_id, amount } = request.body;
+export class SpendController {
+  constructor(private spendService: SpendService) {}
 
-    const result = await processSpend(advertiser_id, amount);
+  async spendController(
+    request: FastifyRequest<{ Body: SpendInput }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { advertiser_id, amount } = request.body;
 
-    return reply.code(200).send(result);
-  } catch (error) {
-    console.error(error);
-    return reply.code(500).send({ message: 'Internal Server Error' });
+      const result = await this.spendService.processSpend(advertiser_id, amount);
+
+      return reply.code(200).send(result);
+    } catch (error) {
+      console.error(error);
+      return reply.code(500).send({ message: 'Internal Server Error' });
+    }
   }
 }

@@ -1,28 +1,32 @@
-import db from '@app/db';
+import { Knex } from 'knex';
 
-export async function createCampaign(campaignData: {
-  advertiser_id: string;
-  campaign_name: string;
-  cost: number;
-  status: 'scheduled' | 'deferred' | 'completed';
-  scheduled_for?: string;
-  reason?: string;
-}) {
-  return db('campaigns').insert(campaignData);
-}
+export class CampaignsRepository {
+  constructor(private db: Knex) {}
 
-export async function updateBudgetUsedToday(advertiserId: string, currentDay: string, amount: number) {
-  return db('budgets')
-    .where({ advertiser_id: advertiserId, current_day: currentDay })
-    .increment('used_today', amount);
-}
+  async createCampaign(campaignData: {
+    advertiser_id: string;
+    campaign_name: string;
+    cost: number;
+    status: 'scheduled' | 'deferred' | 'completed';
+    scheduled_for?: string;
+    reason?: string;
+  }) {
+    return this.db('campaigns').insert(campaignData);
+  }
 
-export async function getAllCampaigns() {
-  return db('campaigns').select('*');
-}
+  async updateBudgetUsedToday(advertiserId: string, currentDay: string, amount: number) {
+    return this.db('budgets')
+      .where({ advertiser_id: advertiserId, current_day: currentDay })
+      .increment('used_today', amount);
+  }
 
-export async function getDeferredCampaigns(advertiserId: string) {
-  return db('campaigns')
-    .where({ advertiser_id: advertiserId, status: 'deferred' })
-    .orderBy('created_at', 'asc');
+  async getAllCampaigns() {
+    return this.db('campaigns').select('*');
+  }
+
+  async getDeferredCampaigns(advertiserId: string) {
+    return this.db('campaigns')
+      .where({ advertiser_id: advertiserId, status: 'deferred' })
+      .orderBy('created_at', 'asc');
+  }
 }

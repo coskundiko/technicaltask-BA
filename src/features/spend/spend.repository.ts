@@ -1,7 +1,11 @@
-import db from '@app/db';
+import { Knex } from 'knex';
 
-export async function updateUsedToday(advertiserId: string, currentDay: string, amount: number) {
-  return db('budgets')
-    .where({ advertiser_id: advertiserId, current_day: currentDay })
-    .increment('used_today', amount);
+export class SpendRepository {
+  constructor(private db: Knex) {}
+
+  async updateUsedToday(advertiserId: string, currentDay: string, amount: number) {
+    return this.db('budgets')
+      .where({ advertiser_id: advertiserId, current_day: currentDay })
+      .increment('used_today', amount);
+  }
 }

@@ -1,39 +1,43 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { TopUpInput, GetBudgetParams } from './budgets.validation';
-import { topUpBalance, getBudgetState } from './budgets.service';
+import { BudgetsService } from './budgets.service';
 
-export async function topUpController(
-  request: FastifyRequest<{ Body: TopUpInput }>,
-  reply: FastifyReply
-) {
-  try {
-    const { advertiser_id, amount } = request.body;
+export class BudgetsController {
+  constructor(private budgetsService: BudgetsService) {}
 
-    await topUpBalance(advertiser_id, amount);
+  async topUpController(
+    request: FastifyRequest<{ Body: TopUpInput }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { advertiser_id, amount } = request.body;
 
-    return reply.code(200).send({ message: 'Top-up successful' });
-  } catch (error) {
-    console.error(error);
-    return reply.code(500).send({ message: 'Internal Server Error' });
-  }
-}
+      await this.budgetsService.topUpBalance(advertiser_id, amount);
 
-export async function getBudgetController(
-  request: FastifyRequest<{ Params: GetBudgetParams }>,
-  reply: FastifyReply
-) {
-  try {
-    const { advertiser_id } = request.params;
-
-    const budgetState = await getBudgetState(advertiser_id);
-
-    if (!budgetState) {
-      return reply.code(404).send({ message: 'Advertiser not found' });
+      return reply.code(200).send({ message: 'Top-up successful' });
+    } catch (error) {
+      console.error(error);
+      return reply.code(500).send({ message: 'Internal Server Error' });
     }
+  }
 
-    return reply.code(200).send(budgetState);
-  } catch (error) {
-    console.error(error);
-    return reply.code(500).send({ message: 'Internal Server Error' });
+  async getBudgetController(
+    request: FastifyRequest<{ Params: GetBudgetParams }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { advertiser_id } = request.params;
+
+      const budgetState = await this.budgetsService.getBudgetState(advertiser_id);
+
+      if (!budgetState) {
+        return reply.code(404).send({ message: 'Advertiser not found' });
+      }
+
+      return reply.code(200).send(budgetState);
+    } catch (error) {
+      console.error(error);
+      return reply.code(500).send({ message: 'Internal Server Error' });
+    }
   }
 }

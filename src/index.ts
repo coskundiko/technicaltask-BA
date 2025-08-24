@@ -1,9 +1,13 @@
 import fastify from 'fastify';
 import helmet from '@fastify/helmet';
-import budgetRoutes from './features/budgets/budgets.routes';
-import campaignRoutes from './features/campaigns/campaigns.routes';
-import simulationRoutes from './features/simulation/simulation.routes';
-import spendRoutes from './features/spend/spend.routes';
+import db from '@app/db';
+
+// Import route factories
+import { createBudgetRoutes } from '@app/features/budgets/budgets.routes';
+import { createCampaignRoutes } from '@app/features/campaigns/campaigns.routes';
+import { createSimulationRoutes } from '@app/features/simulation/simulation.routes';
+import { createSpendRoutes } from '@app/features/spend/spend.routes';
+
 import {
   serializerCompiler,
   validatorCompiler,
@@ -32,11 +36,11 @@ function buildServer() {
     return { status: 'ok' };
   });
 
-  // Register our feature routes
-  server.register(budgetRoutes, { prefix: '/api/budgets' });
-  server.register(campaignRoutes, { prefix: '/api/campaigns' });
-  server.register(simulationRoutes, { prefix: '/api' });
-  server.register(spendRoutes, { prefix: '/api' });
+  // Register our feature routes with dependency injection handled internally
+  server.register(createBudgetRoutes(db), { prefix: '/api/budgets' });
+  server.register(createCampaignRoutes(db), { prefix: '/api/campaigns' });
+  server.register(createSimulationRoutes(db), { prefix: '/api' });
+  server.register(createSpendRoutes(db), { prefix: '/api' });
 
   return server;
 }
